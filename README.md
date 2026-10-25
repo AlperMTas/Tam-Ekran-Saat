@@ -10,6 +10,10 @@
 
 Telefonunuzu veya tabletinizi şık bir dijital masa saatine, akıllı bir odaklanma aracına ve kapsamlı bir ajandaya dönüştürün. Dikkatinizi dağıtmadan anı yakalayın ve verimliliğinizi zirveye taşıyın!
 
+### 📥 Hemen İndir (APK)
+Uygulamayı direkt telefonunuza kurmak için aşağıdaki bağlantıdan en güncel APK dosyasını indirebilirsiniz:
+👉 **[En Güncel Sürümü İndir (Releases)](https://github.com/AlperMTas/Tam-Ekran-Saat/releases/latest)**
+
 ### 🎯 Uygulamanın Amacı
 "Tam Ekran Saat", masanızda çalışırken veya ders çalışırken telefonunuzun bir dikkat dağıtıcı olmasını engellemek için tasarlandı. Minimalist tasarımıyla göz yormaz, gelişmiş odak araçları ve akıllı ajandasıyla hayatınızı organize eder.
 
@@ -41,6 +45,10 @@ Ayrıntılar için `LICENSE` dosyasına göz atabilirsiniz.
 ## 🇬🇧 English
 
 Transform your phone or tablet into a stylish digital desk clock, a smart focus tool, and a comprehensive planner. Stay in the moment without distractions and boost your productivity!
+
+### 📥 Download Now (APK)
+You can download the latest compiled APK file to install the app directly on your phone:
+👉 **[Download the Latest Release (APK)](https://github.com/AlperMTas/Tam-Ekran-Saat/releases/latest)**
 
 ### 🎯 Purpose of the App
 "Tam Ekran Saat" (Full Screen Clock) is designed to prevent your phone from being a distraction while you work or study. With its minimalist design, it's easy on the eyes and organizes your life with advanced focus tools and a smart agenda.
