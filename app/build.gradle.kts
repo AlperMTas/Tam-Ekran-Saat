@@ -26,6 +26,18 @@ android {
             }
         }
     }
+    
+    // Otomatik olarak derlenen APK dosyasının ismini değiştiriyoruz
+    androidComponents {
+        onVariants { variant ->
+            variant.outputs.forEach { output ->
+                // Sadece app-debug değil, app-release vs için de çalışır
+                val apkName = "TamEkranSaat-${variant.name}-v${defaultConfig.versionName}.apk"
+                output.outputFileName.set(apkName)
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
