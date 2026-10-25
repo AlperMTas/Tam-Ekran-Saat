@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
@@ -115,10 +116,20 @@ fun FocusScreen(
     var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) } // Son dokunma zamanı
     var isSleepMode by remember { mutableStateOf(false) } // Uyku (Dim) modu
 
-    LaunchedEffect(Unit) {
-        if (preferencesManager.focusCompletedInBackground) {
-            preferencesManager.focusCompletedInBackground = false
-            showCongratulation = true
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                if (preferencesManager.focusCompletedInBackground) {
+                    preferencesManager.focusCompletedInBackground = false
+                    showCongratulation = true
+                    secondsLeft = preferencesManager.getFocusDuration() * 60
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
@@ -212,7 +223,7 @@ fun FocusScreen(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     ConfettiExplosion()
                     Text(
-                        text = "Harika!\nBir odaklanma seansını\ndaha tamamladın.",
+                        text = stringResource(R.string.focus_congratulations),
                         color = Color.White,
                         fontSize = 42.sp,
                         fontWeight = FontWeight.Bold,
@@ -340,7 +351,7 @@ fun FocusScreen(
                             // Başla / Duraklat Butonu
                             if (isDragging) {
                                 Text(
-                                    text = "Süreyi Ayarla", 
+                                    text = stringResource(R.string.adjust_duration), 
                                     color = Color.White, 
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold
@@ -380,7 +391,7 @@ fun FocusScreen(
                                     modifier = Modifier.height(40.dp)
                                 ) {
                                     Text(
-                                        text = if (isRunning) "DURAKLAT" else "BAŞLA", 
+                                        text = if (isRunning) stringResource(R.string.pause) else stringResource(R.string.start), 
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp
                                     )
@@ -479,7 +490,7 @@ fun FocusScreen(
             AlertDialog(
                 onDismissRequest = { showManualInputDialog = false },
                 containerColor = Color(0xFF1A1A1A),
-                title = { Text("Odak Süresi (Dakika)", color = Color.White) },
+                title = { Text(stringResource(R.string.focus_duration_minutes), color = Color.White) },
                 text = {
                     OutlinedTextField(
                         value = manualInputText,
@@ -510,7 +521,7 @@ fun FocusScreen(
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF444444))
                     ) {
-                        Text("Kaydet", color = Color.White)
+                        Text(stringResource(R.string.save), color = Color.White)
                     }
                 }
             )
