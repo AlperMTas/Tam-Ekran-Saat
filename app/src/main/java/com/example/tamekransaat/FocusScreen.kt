@@ -116,14 +116,21 @@ fun FocusScreen(
     var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) } // Son dokunma zamanı
     var isSleepMode by remember { mutableStateOf(false) } // Uyku (Dim) modu
 
+    // Uygulama arka plandan (veya dışarıdan) ön plana döndüğünde (RESUME) kontrol et
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
                 if (preferencesManager.focusCompletedInBackground) {
                     preferencesManager.focusCompletedInBackground = false
-                    showCongratulation = true
+                    
+                    // Önemli: Sayaç arka planda bitmişse, uygulama uyanır uyanmaz
+                    // doğrudan sayacı sıfırla ve kutlamayı başlat.
+                    isRunning = false
+                    isDragging = false
+                    isSleepMode = false
                     secondsLeft = preferencesManager.getFocusDuration() * 60
+                    showCongratulation = true
                 }
             }
         }
