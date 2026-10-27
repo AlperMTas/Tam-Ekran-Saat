@@ -90,7 +90,6 @@ fun FocusScreen(
     onExitFocus: () -> Unit
 ) {
     val context = LocalContext.current
-    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     val maxMinutes = 60
     val maxSeconds = maxMinutes * 60
     var isRunning by remember { mutableStateOf(preferencesManager.isFocusRunning) } // Sayacın çalışma durumu
@@ -112,26 +111,25 @@ fun FocusScreen(
     var isDragging by remember { mutableStateOf(false) }
     var showManualInputDialog by remember { mutableStateOf(false) } // Elle süre girme penceresi
     var manualInputText by remember { mutableStateOf("") } // Elle girilen süre metni
-    var showCongratulation by remember { mutableStateOf(preferencesManager.focusCompletedInBackground) } // Kutlama yazısı durumu
+    var showCongratulation by remember { mutableStateOf(false) } // Kutlama yazısı durumu
     var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) } // Son dokunma zamanı
     var isSleepMode by remember { mutableStateOf(false) } // Uyku (Dim) modu
 
-    // 1. UYGULAMA HER ÖN PLANA GELDİĞİNDE (ON_RESUME) VE BAŞTAN AÇILDIĞINDA KONTROL ET
+    // --- MİMARİ YENİDEN YAPILANDIRMA: TEK DOĞRU KAYNAK (SINGLE SOURCE OF TRUTH) ---
+    // Artık FocusScreen kendi başına süre bitti kararı vermiyor.
+    // Sürenin bitirilmesi, istatistiklerin kaydedilmesi ve bayrağın tetiklenmesi 
+    // YALNIZCA AlarmManager (FocusTimerReceiver) tarafından yapılıyor.
+    
+    // 1. Yaşam Döngüsü (Lifecycle) Gözlemcisi
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-    var triggerConfetti by remember { mutableStateOf(false) }
+    var isResumed by remember { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-                if (preferencesManager.focusCompletedInBackground) {
-                    preferencesManager.focusCompletedInBackground = false
-                    isRunning = false
-                    isDragging = false
-                    isSleepMode = false
-                    secondsLeft = preferencesManager.getFocusDuration() * 60
-                    
-                    triggerConfetti = true
-                }
+                isResumed = true
+            } else if (event == androidx.lifecycle.Lifecycle.Event.ON_PAUSE) {
+                isResumed = false
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -139,94 +137,61 @@ fun FocusScreen(
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
-    
-    // Uygulama RAM'den temizlenmiş ve soğuk başlangıç (Cold Start) yapıyorsa
-    LaunchedEffect(Unit) {
-        if (preferencesManager.focusCompletedInBackground) {
+
+    // 2. Uygulama Ön Plana Geldiğinde (Resume) veya Baştan Açıldığında Konfeti Kontrolü
+    LaunchedEffect(isResumed) {
+        if (isResumed && preferencesManager.focusCompletedInBackground) {
             preferencesManager.focusCompletedInBackground = false
             isRunning = false
             isDragging = false
             isSleepMode = false
             secondsLeft = preferencesManager.getFocusDuration() * 60
-            
-            triggerConfetti = true
-        }
-    }
-    
-    // 2. TETİKLEYİCİ ATEŞLENDİĞİNDE KONFETİYİ GÜVENLİ BİR ŞEKİLDE BAŞLAT
-    LaunchedEffect(triggerConfetti) {
-        if (triggerConfetti) {
-            // Compose'un transition'ları (AnimatedContent) atlamaması için,
-            // Ekranın önce normal Focus state'ini çizmesini bekliyoruz.
-            // Aksi halde milisaniyelik bir hızla true olduğu için konfeti animasyonu eziliyor.
-            delay(300) 
             showCongratulation = true
-            triggerConfetti = false
         }
     }
 
-    // Saniyede 1 çalışan sayaç
+    // 3. Ön Planda Çalışan Sayaç Döngüsü (Yalnızca isRunning == true ise çalışır)
     LaunchedEffect(isRunning, isDragging) {
         if (isRunning && !isDragging) {
-            while (secondsLeft > 0) {
-                delay(1000)
-                // Arka plan sayacı veya mevcut zamana göre güncelle
+            while (true) {
+                // AlarmManager arka planda süreyi bitirip bayrağı kaldırdıysa:
+                if (!preferencesManager.isFocusRunning && preferencesManager.focusCompletedInBackground) {
+                    preferencesManager.focusCompletedInBackground = false
+                    isRunning = false
+                    isSleepMode = false
+                    secondsLeft = preferencesManager.getFocusDuration() * 60
+                    showCongratulation = true
+                    break // Döngüden çık
+                }
+
+                // Normal zaman hesabı
                 val now = System.currentTimeMillis()
                 val end = preferencesManager.focusEndTime
-                
                 if (now >= end) {
                     secondsLeft = 0
+                    // DİKKAT: Buradan alarmı iptal etmiyoruz veya istatistik kaydetmiyoruz!
+                    // Receiver'ın (AlarmManager) tetiklenmesini ve yukarıdaki 'if' bloğuna düşmesini bekliyoruz.
                 } else {
                     secondsLeft = ((end - now) / 1000).toInt()
                 }
-            }
-            if (!showCongratulation) {
-                isRunning = false // Süre bitince durdur
-                
-                // İstatistikleri ve bildirimi sadece bir kez tetikle
-                if (preferencesManager.isFocusRunning) {
-                    preferencesManager.isFocusRunning = false // Durumu kaydet
-                    cancelFocusAlarm(context)
-                    
-                    val duration = preferencesManager.focusOriginalDuration
-                    val nowDt = LocalDateTime.now()
-                    val dateStr = nowDt.toLocalDate().toString()
-                    repeat(duration) {
-                        preferencesManager.addFocusMinute(dateStr)
-                        preferencesManager.addFocusMinuteToHeatmap(nowDt.dayOfWeek.value, nowDt.hour)
-                    }
-                    
-                    // Bildirimi göster ve DND'yi kapat
-                    FocusNotificationHelper.showFocusCompletedNotification(context)
-                }
-                
-                isSleepMode = false // Ekranı uyandır
-                
-                // Titreşim
-                vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE))
-                
-                // Kutlama metnini göster ve süreyi başa sar
-                showCongratulation = true
-                secondsLeft = preferencesManager.getFocusDuration() * 60
+
+                delay(250) // Çeyrek saniyede bir kontrol et (Hızlı tepkime için)
             }
         }
     }
 
-    // 30 saniye hareketsizlik algılayıcı
-    LaunchedEffect(lastInteractionTime) {
-        delay(30000) // 30 saniye bekle
-        isSleepMode = true // Uyku moduna geçir
-    }
-
-
-    
-    // Kutlama Ekranının Kaybolmasını Sağlayan Döngü
-    // Süre arka planda bittiyse anında silinmemesi için en az 3 saniye beklemesini sağlıyoruz
+    // 4. Konfeti Zamanlayıcısı
     LaunchedEffect(showCongratulation) {
         if (showCongratulation) {
-            delay(3000)
+            delay(4000) // Konfetiler ekranda 4 saniye kalsın
             showCongratulation = false
         }
+    }
+
+    // 5. Hareketsizlik (Uyku) Algılayıcı
+    LaunchedEffect(lastInteractionTime) {
+        delay(30000) // 30 saniye bekle
+        isSleepMode = true
     }
 
     Box(
