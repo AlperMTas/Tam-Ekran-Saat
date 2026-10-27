@@ -83,22 +83,26 @@ fun GrowthCenterView(preferencesManager: PreferencesManager) {
     ) {
         // ÜST BİLGİ: Yapay Zeka Analizi (Eski üst kutunun daha şık hali)
         Card(
-            modifier = Modifier.fillMaxWidth(0.9f),
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .heightIn(min = 100.dp), // Kutu yüksekliğini artırdım
             colors = CardDefaults.cardColors(containerColor = Color(0xFF161916)), // Şık koyu yeşil arka plan
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(20.dp) // Köşeleri biraz daha yumuşattım
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp), // İç boşluğu (padding) artırdım
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("✨", fontSize = 24.sp)
-                Spacer(modifier = Modifier.width(12.dp))
+                Text("✨", fontSize = 32.sp) // İkonu büyüttüm
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = insightText,
                     color = Color(0xFFE8F5E9),
-                    fontSize = 16.sp,
+                    fontSize = 20.sp, // Metin boyutu 18sp'den 20sp'ye çıkarıldı
                     fontWeight = FontWeight.Medium,
-                    lineHeight = 22.sp
+                    lineHeight = 28.sp // Satır arası boşluk orantılı artırıldı
                 )
             }
         }
@@ -177,21 +181,25 @@ fun GrowthCenterView(preferencesManager: PreferencesManager) {
 
         // ALT BİLGİ: Motivasyon Mesajı
         Card(
-            modifier = Modifier.fillMaxWidth(0.85f),
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .heightIn(min = 100.dp), // Kutu yüksekliğini artırdım
             colors = CardDefaults.cardColors(containerColor = Color(0xFF16161A)), // Şık koyu lacivert
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(20.dp) // Köşeleri biraz daha yumuşattım
         ) {
             Row(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp), // İç boşluğu (padding) artırdım
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("💡", fontSize = 28.sp)
+                Text("💡", fontSize = 32.sp) // İkonu büyüttüm
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = message,
                     color = Color.White,
-                    fontSize = 18.sp,
-                    lineHeight = 26.sp,
+                    fontSize = 20.sp, // Metin boyutu 18sp'den 20sp'ye çıkarıldı
+                    lineHeight = 28.sp, // Satır arası boşluk orantılı artırıldı
                     fontWeight = FontWeight.Medium
                 )
             }
