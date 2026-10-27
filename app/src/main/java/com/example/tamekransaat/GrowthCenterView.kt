@@ -1,8 +1,6 @@
 ﻿package com.example.tamekransaat
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,8 +15,36 @@ import androidx.compose.ui.res.stringResource
 
 @Composable
 fun GrowthCenterView(preferencesManager: PreferencesManager) {
-    val thisWeekMinutes = preferencesManager.getWeeklyFocusMinutes(0)
-    val lastWeekMinutes = preferencesManager.getWeeklyFocusMinutes(1)
+    // PERFORMANS ÇÖZÜMÜ:
+    // Menüler arası geçişteki kasma ve donmaların sebebi, her frame çiziminde
+    // SharedPreferences veritabanından 180'den fazla veri okunmasıydı.
+    // 'remember' kullanarak bu hesaplamaların sekme açıldığında SADECE BİR KERE yapılmasını sağladım.
+    // Artık geçişler yağ gibi akacak.
+    val stats = remember {
+        val tw = preferencesManager.getWeeklyFocusMinutes(0)
+        val lw = preferencesManager.getWeeklyFocusMinutes(1)
+        var maxM = 0
+        var bDay = 1
+        var bHour = 9
+
+        for (d in 1..7) {
+            for (h in 0..23) {
+                val mins = preferencesManager.getHeatmapMinute(d, h)
+                if (mins > maxM) {
+                    maxM = mins
+                    bDay = d
+                    bHour = h
+                }
+            }
+        }
+        listOf(tw, lw, maxM, bDay, bHour)
+    }
+
+    val thisWeekMinutes = stats[0]
+    val lastWeekMinutes = stats[1]
+    val maxMinutes = stats[2]
+    val bestDay = stats[3]
+    val bestHour = stats[4]
 
     val diff = thisWeekMinutes - lastWeekMinutes
     val isPositive = diff > 0
@@ -40,21 +66,6 @@ fun GrowthCenterView(preferencesManager: PreferencesManager) {
         100f
     }
 
-    var maxMinutes = 0
-    var bestDay = 1
-    var bestHour = 9
-
-    for (d in 1..7) {
-        for (h in 0..23) {
-            val mins = preferencesManager.getHeatmapMinute(d, h)
-            if (mins > maxMinutes) {
-                maxMinutes = mins
-                bestDay = d
-                bestHour = h
-            }
-        }
-    }
-
     val insightText = if (maxMinutes == 0) {
         stringResource(R.string.smart_analysis_no_data)
     } else {
@@ -63,171 +74,106 @@ fun GrowthCenterView(preferencesManager: PreferencesManager) {
         stringResource(R.string.smart_analysis_data, bestDayName, formattedHour)
     }
 
-    // YENİ MODERN ARAYÜZ TASARIMI (İki Panelli Dashboard)
-    Row(
+    // YENİ, SADE VE ŞIK TASARIM
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp, vertical = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
-        // SOL PANEL: Performans Özeti (Dashboard Card)
+        // BAŞLIK
+        Text(
+            text = stringResource(R.string.personal_growth_center),
+            color = Color.White,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
+
+        // 1. HAFTALIK ÖZET KARTI
         Card(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF161618)),
-            shape = RoundedCornerShape(24.dp)
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+            shape = RoundedCornerShape(20.dp)
         ) {
-            Column(
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(24.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Başlık
-                Text(
-                    text = "📈 " + stringResource(R.string.personal_growth_center),
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                // Ana Metrik (Bu Hafta)
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text(
-                        text = stringResource(R.string.this_week), 
-                        color = Color.Gray, 
-                        fontSize = 16.sp
-                    )
+                // Geçen Hafta
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.last_week), color = Color.Gray, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.min_format, thisWeekMinutes), 
-                        color = Color.White, 
-                        fontSize = 56.sp, 
-                        fontWeight = FontWeight.ExtraBold
-                    )
+                    Text(stringResource(R.string.min_format, lastWeekMinutes), color = Color.LightGray, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 }
 
-                // Alt Kısım (Geçen Hafta ve Trend)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
+                // Trend
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (!isNeutral && (thisWeekMinutes > 0 || lastWeekMinutes > 0)) {
+                        val color = if (isPositive) Color(0xFF4CAF50) else Color(0xFFFF9800)
+                        val icon = if (isPositive) "▲" else "▼"
                         Text(
-                            text = stringResource(R.string.last_week), 
-                            color = Color.DarkGray, 
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = stringResource(R.string.min_format, lastWeekMinutes), 
-                            color = Color.LightGray, 
-                            fontSize = 20.sp, 
+                            text = "$icon %${percentage.toInt()}",
+                            color = color,
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
-                    }
-
-                    // Trend Rozeti (Artış / Azalış)
-                    if (!isNeutral && (thisWeekMinutes > 0 || lastWeekMinutes > 0)) {
-                        val trendColor = if (isPositive) Color(0xFF4CAF50) else Color(0xFFFF9800)
-                        val icon = if (isPositive) "▲" else "▼"
-                        Surface(
-                            color = trendColor.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = "$icon %${percentage.toInt()}",
-                                color = trendColor,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                            )
-                        }
                     } else {
-                        Surface(
-                            color = Color.Gray.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = "=",
-                                color = Color.Gray,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                            )
-                        }
+                        Text("=", color = Color.Gray, fontSize = 32.sp, fontWeight = FontWeight.Bold)
                     }
+                }
+
+                // Bu Hafta
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.this_week), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(stringResource(R.string.min_format, thisWeekMinutes), color = Color(0xFF4CAF50), fontSize = 36.sp, fontWeight = FontWeight.ExtraBold)
                 }
             }
         }
 
-        // SAĞ PANEL: Yapay Zeka Analizi ve Motivasyon
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        // 2. YARDIMCI BİLGİLER (İki yan yana kutu)
+        Row(
+            modifier = Modifier.fillMaxWidth(0.9f),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Akıllı Analiz (AI Insight) Kartı
+            // Analiz
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1B231B)), // Hafif yeşilimsi siyah
-                shape = RoundedCornerShape(24.dp)
+                modifier = Modifier.weight(1f),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxSize().padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(Color(0xFF4CAF50).copy(alpha = 0.2f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("✨", fontSize = 24.sp)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("✨", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.ai_insight), color = Color(0xFF4CAF50), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = insightText,
-                        color = Color(0xFFE8F5E9),
-                        fontSize = 16.sp,
-                        lineHeight = 22.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = insightText, color = Color.LightGray, fontSize = 14.sp, lineHeight = 20.sp)
                 }
             }
 
-            // Motivasyon Kartı
+            // Motivasyon
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E22)), // Hafif mavimsi siyah
-                shape = RoundedCornerShape(24.dp)
+                modifier = Modifier.weight(1f),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxSize().padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(Color(0xFF2196F3).copy(alpha = 0.2f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("💡", fontSize = 24.sp)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("💡", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.motivation), color = Color(0xFF2196F3), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = message,
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        lineHeight = 22.sp
-                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = message, color = Color.LightGray, fontSize = 14.sp, lineHeight = 20.sp)
                 }
             }
         }
