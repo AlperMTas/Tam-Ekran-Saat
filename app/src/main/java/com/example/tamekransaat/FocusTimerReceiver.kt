@@ -31,10 +31,10 @@ object FocusNotificationHelper {
         // 2. Bildirim Kanalı Oluştur
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Odak Zamanlayıcısı",
+            context.getString(R.string.focus_channel_name),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Odak süresi dolduğunda bildirim ve sesli uyarı gösterir"
+            description = context.getString(R.string.focus_channel_desc)
             enableVibration(true)
             enableLights(true)
             lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
@@ -43,7 +43,10 @@ object FocusNotificationHelper {
 
         // 3. Tıklandığında MainActivity'yi açacak Intent
         val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            // Android'in mevcut Activity'i yok etmeden (yeniden başlatmadan) çağırması için
+            // Single Top ve Reorder to Front kullanıyoruz.
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            action = "ACTION_OPEN_FROM_NOTIFICATION"
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -56,8 +59,8 @@ object FocusNotificationHelper {
         // 4. Yüksek öncelikli bildirim oluştur
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Odak Süresi Tamamlandı! 🎉")
-            .setContentText("Harika! Bir odaklanma seansını daha başarıyla tamamladın.")
+            .setContentTitle(context.getString(R.string.focus_completed_title))
+            .setContentText(context.getString(R.string.focus_completed_text))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setDefaults(NotificationCompat.DEFAULT_ALL)

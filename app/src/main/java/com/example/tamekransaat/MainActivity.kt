@@ -38,6 +38,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -124,6 +125,9 @@ class MainActivity : ComponentActivity() {
             appState.value = AppState.CALENDAR
             initialCalendarTab.value = CalendarTab.MONTHLY
             intent.action = null // İkinci kez aynı intentin tetiklenmesini engelle
+        } else if (intent?.action == "ACTION_OPEN_FROM_NOTIFICATION") {
+            appState.value = AppState.FOCUS
+            intent.action = null
         } else {
             initialCalendarTab.value = CalendarTab.GROWTH
         }
@@ -247,7 +251,7 @@ fun MainScreen(
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
             ) {
                 Text(
-                    text = "💡 Takvime ve Gelişim ekranına ulaşmak için ekrana çift tıklayın veya basılı tutun.",
+                    text = stringResource(R.string.tutorial_text),
                     color = Color.White,
                     fontSize = 14.sp
                 )
@@ -278,14 +282,14 @@ fun MainScreen(
                 shape = RoundedCornerShape(24.dp),
                 title = { 
                     Text(
-                        text = "Odak Modu Deneyimi", 
+                        text = stringResource(R.string.focus_mode_experience), 
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     ) 
                 },
                 text = { 
                     Text(
-                        text = "Odaklanma süresince telefonunun seni bildirimlerle rahatsız etmesini (sessize almasını) ister misin?\n\n(Bunun için ayarlardan izin vermen gerekiyor.)", 
+                        text = stringResource(R.string.focus_dnd_prompt), 
                         color = Color.LightGray,
                         fontSize = 16.sp
                     ) 
@@ -298,7 +302,7 @@ fun MainScreen(
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
                     ) {
-                        Text("İzin Ver (Ayarlar)", color = Color.White)
+                        Text(stringResource(R.string.allow_settings), color = Color.White)
                     }
                 },
                 dismissButton = {
@@ -310,7 +314,7 @@ fun MainScreen(
                             onAppStateChange(AppState.FOCUS)
                         }
                     ) {
-                        Text("Tekrar Sorma, Başla", color = Color.Gray)
+                        Text(stringResource(R.string.dont_ask_start), color = Color.Gray)
                     }
                 }
             )
