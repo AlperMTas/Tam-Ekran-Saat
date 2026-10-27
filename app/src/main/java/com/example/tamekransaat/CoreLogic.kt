@@ -11,7 +11,19 @@ import kotlin.random.Random
 // Sistemin 3 ana deterministik durumu
 enum class AppState { AMBIENT, FOCUS, CALENDAR }
 enum class CalendarTab { GROWTH, BIORHYTHM, WEEKLY_SCHEDULE, MONTHLY }
-enum class NoteType(val displayName: String) { NOTE("Not"), TASK("Görev"), EVENT("Etkinlik") }
+enum class NoteType(val displayName: String) { 
+    NOTE("Not"), 
+    TASK("Görev"), 
+    EVENT("Etkinlik");
+    
+    fun getDisplayName(context: Context): String {
+        return when (this) {
+            NOTE -> context.getString(R.string.type_note)
+            TASK -> context.getString(R.string.type_task)
+            EVENT -> context.getString(R.string.type_event)
+        }
+    }
+}
 
 data class DayNote(
     val text: String, 

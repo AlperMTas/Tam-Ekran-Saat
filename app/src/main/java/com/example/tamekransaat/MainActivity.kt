@@ -125,10 +125,20 @@ class MainActivity : ComponentActivity() {
             appState.value = AppState.CALENDAR
             initialCalendarTab.value = CalendarTab.MONTHLY
             intent.action = null // İkinci kez aynı intentin tetiklenmesini engelle
-        } else if (intent?.action == "ACTION_OPEN_FROM_NOTIFICATION") {
-            appState.value = AppState.FOCUS
-            intent.action = null
         } else {
+            // İster bildirimden (ACTION_OPEN_FROM_NOTIFICATION) gelsin
+            // ister normal simgeden (Launcher) gelsin, eğer sayaç arka planda bitmişse
+            // her halükarda uygulamanın doğrudan FOCUS (Odak) ekranında açılmasını sağla
+            if (preferencesManager.focusCompletedInBackground) {
+                // Focus'a geç ve ondan sonra state değişimi compose'da tetiklensin
+                appState.value = AppState.FOCUS
+            }
+            
+            // Eğer bildirimden gelmişse Intent'i temizle
+            if (intent?.action == "ACTION_OPEN_FROM_NOTIFICATION") {
+                intent.action = null
+            }
+            
             initialCalendarTab.value = CalendarTab.GROWTH
         }
     }

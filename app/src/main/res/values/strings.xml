@@ -1,3 +1,94 @@
 <resources>
-    <string name="app_name">Tam Ekran Saat</string>
+    <string name="app_name">TamEkranSaat</string>
+    <!-- AmbientScreen -->
+    <string name="start_focus_mode">Start Focus Mode</string>
+
+    <!-- FocusScreen -->
+    <string name="focus_congratulations">Great!\nYou have completed another\nfocus session.</string>
+    <string name="adjust_duration">Adjust Duration</string>
+    <string name="pause">PAUSE</string>
+    <string name="start">START</string>
+    <string name="focus_duration_minutes">Focus Duration (Minutes)</string>
+    <string name="save">Save</string>
+
+    <!-- FocusTimerReceiver -->
+    <string name="focus_channel_name">Focus Timer</string>
+    <string name="focus_channel_desc">Shows notification and sound alert when focus time is up</string>
+    <string name="focus_completed_title">Focus Time Completed! 🎉</string>
+    <string name="focus_completed_text">Great! You have successfully completed another focus session.</string>
+
+    <!-- MainActivity -->
+    <string name="focus_mode_experience">Focus Mode Experience</string>
+    <string name="focus_dnd_prompt">Would you like your phone to mute notifications (Do Not Disturb) during your focus session?\n\n(You need to grant permission from settings for this.)</string>
+    <string name="allow_settings">Allow (Settings)</string>
+    <string name="dont_ask_start">Don\'t Ask Again, Start</string>
+    <string name="tutorial_text">💡 Double tap or long press the screen to access the Calendar and Growth Center.</string>
+
+    <!-- CalendarScreen -->
+    <string name="growth_center">Growth Center</string>
+    <string name="biorhythm_heatmap">Biorhythm (Heatmap)</string>
+    <string name="weekly_schedule">Weekly Schedule</string>
+    <string name="monthly_calendar">Monthly Calendar</string>
+    <string name="close">Close</string>
+
+    <!-- GrowthCenterView -->
+    <string name="personal_growth_center">Personal Growth Center</string>
+    <string name="last_week">Last Week</string>
+    <string name="this_week">This Week</string>
+    <string name="growth_start">Your growth journey begins here. A great week to take your first step!</string>
+    <string name="growth_neutral">Great consistency! You are maintaining your pace from last week, keep it up.</string>
+    <string name="growth_positive">You are amazing! You focused %1$d minutes more than last week. Pushing your limits!</string>
+    <string name="growth_negative">Resting is an important part of the process. You dedicated this week to recharging your mind. You will come back stronger next week!</string>
+    <string name="smart_analysis_no_data">Not enough data yet. Start focusing!</string>
+    <string name="smart_analysis_data">You get your highest efficiency on %1$s mornings around %2$s. Handle your hardest task at that time today!</string>
+    <string name="min_format">%1$dmin</string>
+    <string name="ai_insight">AI Insight</string>
+    <string name="motivation">Motivation</string>
+
+    <!-- BiorhythmHeatmap -->
+    <string name="weekly_biorhythm">Weekly Biorhythm (Heatmap)</string>
+    <string name="biorhythm_info_title">What is Biorhythm?</string>
+    <string name="biorhythm_info_desc">This map learns your focus habits over time. Every time you complete a focus session, the block for that specific day and time gets brighter. As weeks pass, you can discover your most productive hours (your biorhythm) by looking at the intensity of these colors!</string>
+    <string name="got_it">Got it</string>
+
+    <!-- ClassicMonthView -->
+    <string name="back_to_today">Back to Today</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- NoteDialogComponents -->
+    <string name="plan_of_the_day">Plan of the Day</string>
+    <string name="save_plan">Save Plan</string>
+    <string name="cancel_it">Cancel</string>
+    <string name="clear_all">Clear All</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time_optional">End Time (Optional)</string>
+    <string name="clear">Clear</string>
+    <string name="ok">OK</string>
+    <string name="end">End</string>
+    <string name="new_plan_add">+ Add New Plan</string>
+    <string name="recurring_weekly">🔄 Every Week</string>
+    <string name="note_label_format">%1$d. Task / Note</string>
+
+    <!-- ReminderWorker -->
+    <string name="reminder_channel_name">Daily Reminders</string>
+    <string name="reminder_channel_desc">Notifications for tasks and motivational messages</string>
+    <string name="upcoming_event_title">Upcoming Event 📅</string>
+    <string name="upcoming_event_desc">You have an event tomorrow around %1$s: %2$s</string>
+    <string name="todays_task_title">Task of the Day 📌</string>
+    <string name="todays_task_desc">You have a task to handle today: %1$s</string>
+    <string name="focus_time_title">Time to Focus 🚀</string>
+    <string name="motivation_1">Great day! Perfect time to focus. ✨</string>
+    <string name="motivation_2">Small steps bring big success. How about a 25-minute focus session?</string>
+    <string name="motivation_3">Is your mind ready? Get to your desk and conquer the day! ⏳</string>
+    <string name="motivation_4">I am sure you will achieve great things today too! 🚀</string>
+
+    <!-- TaskWidget -->
+    <string name="widget_plan_of_the_day">Plan of the Day</string>
+    <string name="widget_no_plan">There are no plans added for today.</string>
+    <string name="widget_upcoming">Upcoming (%1$s):</string>
+
+    <!-- CoreLogic (NoteType) -->
+    <string name="type_note">Note</string>
+    <string name="type_task">Task</string>
+    <string name="type_event">Event</string>
 </resources>

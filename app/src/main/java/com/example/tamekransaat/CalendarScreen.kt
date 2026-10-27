@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.input.pointer.pointerInput
 
 @Composable
@@ -47,13 +48,13 @@ fun CalendarScreen(preferencesManager: PreferencesManager, initialTab: CalendarT
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                TabButton("Gelişim Merkezi", currentTab == CalendarTab.GROWTH) { currentTab = CalendarTab.GROWTH }
-                TabButton("Bioritim (Isı Haritası)", currentTab == CalendarTab.BIORHYTHM) { currentTab = CalendarTab.BIORHYTHM }
-                TabButton("Haftalık Program", currentTab == CalendarTab.WEEKLY_SCHEDULE) { currentTab = CalendarTab.WEEKLY_SCHEDULE }
-                TabButton("Aylık Takvim", currentTab == CalendarTab.MONTHLY) { currentTab = CalendarTab.MONTHLY }
+                TabButton(stringResource(R.string.growth_center), currentTab == CalendarTab.GROWTH) { currentTab = CalendarTab.GROWTH }
+                TabButton(stringResource(R.string.biorhythm_heatmap), currentTab == CalendarTab.BIORHYTHM) { currentTab = CalendarTab.BIORHYTHM }
+                TabButton(stringResource(R.string.weekly_schedule), currentTab == CalendarTab.WEEKLY_SCHEDULE) { currentTab = CalendarTab.WEEKLY_SCHEDULE }
+                TabButton(stringResource(R.string.monthly_calendar), currentTab == CalendarTab.MONTHLY) { currentTab = CalendarTab.MONTHLY }
             }
             Button(onClick = onClose, colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
-                Text("Kapat", color = Color.White)
+                Text(stringResource(R.string.close), color = Color.White)
             }
         }
 

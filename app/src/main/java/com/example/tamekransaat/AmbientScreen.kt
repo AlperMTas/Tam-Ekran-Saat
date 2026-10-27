@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -104,7 +105,7 @@ fun AmbientScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Odak Moduna Geç", 
+                text = stringResource(R.string.start_focus_mode), 
                 color = Color(0xFF555555), 
                 fontSize = 16.sp
             )

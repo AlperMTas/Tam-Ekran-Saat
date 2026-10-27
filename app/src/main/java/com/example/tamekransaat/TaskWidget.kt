@@ -107,7 +107,7 @@ fun WidgetContent(notes: List<DayNote>, upcomingDate: LocalDate?, upcomingNote: 
             }))
     ) {
         Text(
-            text = "Günün Planı",
+            text = context.getString(R.string.widget_plan_of_the_day),
             style = TextStyle(
                 color = ColorProvider(Color.White),
                 fontSize = 16.sp,
@@ -118,7 +118,7 @@ fun WidgetContent(notes: List<DayNote>, upcomingDate: LocalDate?, upcomingNote: 
         
         if (notes.isEmpty()) {
             Text(
-                text = "Bugün için eklenmiş bir plan bulunmuyor.",
+                text = context.getString(R.string.widget_no_plan),
                 style = TextStyle(
                     color = ColorProvider(Color.Gray),
                     fontSize = 14.sp
@@ -154,9 +154,9 @@ fun WidgetContent(notes: List<DayNote>, upcomingDate: LocalDate?, upcomingNote: 
         if (upcomingNote != null && upcomingDate != null) {
             Spacer(modifier = GlanceModifier.defaultWeight()) // Alta it
             
-            val formatter = DateTimeFormatter.ofPattern("d MMM", Locale("tr"))
+            val formatter = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
             Text(
-                text = "Yaklaşan (${upcomingDate.format(formatter)}):",
+                text = context.getString(R.string.widget_upcoming, upcomingDate.format(formatter)),
                 style = TextStyle(
                     color = ColorProvider(Color(0xFFAAAAAA)), // Daha silik bir gri
                     fontSize = 12.sp,

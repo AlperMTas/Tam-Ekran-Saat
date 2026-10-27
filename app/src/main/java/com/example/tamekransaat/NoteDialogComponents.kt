@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.input.pointer.pointerInput
 
 
@@ -58,7 +59,7 @@ fun NoteEditDialog(
 ) {
     val dateStr = date.toString()
     val existingNotes = preferencesManager.getNotesForDate(dateStr)
-    val monthsTr = listOf("Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık")
+    val months = (1..12).map { java.time.Month.of(it).getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault()) }
     
     val colors = listOf(
         0xFFFF6B6B, 
@@ -100,14 +101,14 @@ fun NoteEditDialog(
         title = { 
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "${date.dayOfMonth} ${monthsTr[date.monthValue - 1]}", 
+                    text = "${date.dayOfMonth} ${months[date.monthValue - 1]}", 
                     color = Color.White,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Günün Planı", 
+                    text = stringResource(R.string.plan_of_the_day), 
                     color = Color.Gray,
                     fontSize = 14.sp
                 )
@@ -131,7 +132,7 @@ fun NoteEditDialog(
                 ) {
                     mutableNotes.forEachIndexed { index, mNote ->
                         ModernNoteSlot(
-                            label = "${index + 1}. Görev / Not",
+                            label = stringResource(R.string.note_label_format, index + 1),
                             text = mNote.text,
                             onTextChanged = { mNote.text = it },
                             timeStr = mNote.timeStr,
@@ -157,7 +158,7 @@ fun NoteEditDialog(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("+ Yeni Plan Ekle", color = Color(0xFF4ECDC4), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.new_plan_add), color = Color(0xFF4ECDC4), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -178,14 +179,14 @@ fun NoteEditDialog(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth().height(48.dp)
             ) {
-                Text("Planı Kaydet", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.save_plan), color = Color.White, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             val context = LocalContext.current
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(onClick = { onDismiss() }) {
-                    Text("İptal Et", color = Color.Gray)
+                    Text(stringResource(R.string.cancel_it), color = Color.Gray)
                 }
                 TextButton(
                     onClick = { 
@@ -194,7 +195,7 @@ fun NoteEditDialog(
                         onDismiss() 
                     }
                 ) {
-                    Text("Tümünü Temizle", color = Color(0xFFFF6B6B))
+                    Text(stringResource(R.string.clear_all), color = Color(0xFFFF6B6B))
                 }
             }
         }
@@ -248,7 +249,7 @@ fun ModernNoteSlot(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = type.displayName,
+                            text = type.getDisplayName(LocalContext.current),
                             color = if (isSelected) Color.Black else Color.LightGray,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
@@ -325,7 +326,7 @@ fun ModernNoteSlot(
                         AlertDialog(
                             onDismissRequest = { expandedStart = false },
                             containerColor = Color(0xFF161618),
-                            title = { Text("Başlangıç Saati", color = Color.White) },
+                            title = { Text(stringResource(R.string.start_time), color = Color.White) },
                             text = {
                                 WheelTimePicker(
                                     initialTime = timeStr,
@@ -334,7 +335,7 @@ fun ModernNoteSlot(
                             },
                             confirmButton = {
                                 TextButton(onClick = { expandedStart = false }) {
-                                    Text("Tamam", color = Color(0xFF4CAF50))
+                                    Text(stringResource(R.string.ok), color = Color(0xFF4CAF50))
                                 }
                             }
                         )
@@ -351,7 +352,7 @@ fun ModernNoteSlot(
                         onValueChange = {},
                         readOnly = true,
                         enabled = false,
-                        placeholder = { Text("Bitiş", color = Color.DarkGray, fontSize = 12.sp) },
+                        placeholder = { Text(stringResource(R.string.end), color = Color.DarkGray, fontSize = 12.sp) },
                         colors = TextFieldDefaults.colors(
                             disabledTextColor = Color.White,
                             disabledContainerColor = Color.Transparent,
@@ -368,7 +369,7 @@ fun ModernNoteSlot(
                         AlertDialog(
                             onDismissRequest = { expandedEnd = false },
                             containerColor = Color(0xFF161618),
-                            title = { Text("Bitiş Saati (Opsiyonel)", color = Color.White) },
+                            title = { Text(stringResource(R.string.end_time_optional), color = Color.White) },
                             text = {
                                 WheelTimePicker(
                                     initialTime = if(endTimeStr.isEmpty()) timeStr else endTimeStr,
@@ -377,12 +378,12 @@ fun ModernNoteSlot(
                             },
                             dismissButton = {
                                 TextButton(onClick = { onEndTimeChanged(""); expandedEnd = false }) {
-                                    Text("Temizle", color = Color(0xFFFF6B6B))
+                                    Text(stringResource(R.string.clear), color = Color(0xFFFF6B6B))
                                 }
                             },
                             confirmButton = {
                                 TextButton(onClick = { expandedEnd = false }) {
-                                    Text("Tamam", color = Color(0xFF4CAF50))
+                                    Text(stringResource(R.string.ok), color = Color(0xFF4CAF50))
                                 }
                             }
                         )
@@ -432,7 +433,7 @@ fun ModernNoteSlot(
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "🔄 Her Hafta",
+                    text = stringResource(R.string.recurring_weekly),
                     color = if (isRecurring) Color(0xFF4CAF50) else Color.Gray,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold

@@ -24,7 +24,7 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         // 1. KONTROL: Yarınki Etkinlikler
         val upcomingEvent = tomorrowNotes.firstOrNull { it.type == NoteType.EVENT }
         if (upcomingEvent != null) {
-            sendNotification("Yaklaşan Etkinlik \uD83D\uDCC5", "Yarın ${upcomingEvent.timeStr} sularında bir etkinliğin var: ${upcomingEvent.text}", 101)
+            sendNotification(applicationContext.getString(R.string.upcoming_event_title), applicationContext.getString(R.string.upcoming_event_desc, upcomingEvent.timeStr, upcomingEvent.text), 101)
             notificationSent = true
         }
 
@@ -32,7 +32,7 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         if (!notificationSent) {
             val todayTask = todayNotes.firstOrNull { it.type == NoteType.TASK }
             if (todayTask != null) {
-                sendNotification("Günün Görevi \uD83D\uDCCC", "Bugün halletmen gereken bir iş var: ${todayTask.text}", 102)
+                sendNotification(applicationContext.getString(R.string.todays_task_title), applicationContext.getString(R.string.todays_task_desc, todayTask.text), 102)
                 notificationSent = true
             }
         }
@@ -40,12 +40,12 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         // 3. KONTROL: Teşvik edici dostça mesajlar (Eğer özel bir görev/etkinlik yoksa %50 şansla gönderir)
         if (!notificationSent && Math.random() > 0.5) {
             val motivations = listOf(
-                "Harika bir gün! Odaklanmak için mükemmel bir zaman. ✨",
-                "Küçük adımlar büyük başarılar getirir. 25 dakika odaklanmaya ne dersin?",
-                "Zihnin hazır mı? Masana geç ve gününü fethet! ⏳",
-                "Bugün de harika işler başaracağına eminim! \uD83D\uDE80"
+                applicationContext.getString(R.string.motivation_1),
+                applicationContext.getString(R.string.motivation_2),
+                applicationContext.getString(R.string.motivation_3),
+                applicationContext.getString(R.string.motivation_4)
             )
-            sendNotification("Odaklanma Vakti \uD83D\uDE80", motivations.random(), 103)
+            sendNotification(applicationContext.getString(R.string.focus_time_title), motivations.random(), 103)
         }
 
         return Result.success()
@@ -57,8 +57,8 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         
         // Android 8 (Oreo) ve üzeri için Bildirim Kanalı (Channel) oluşturulması zorunludur
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "Günlük Hatırlatmalar", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "Görevler ve teşvik mesajları için bildirimler"
+            val channel = NotificationChannel(channelId, applicationContext.getString(R.string.reminder_channel_name), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = applicationContext.getString(R.string.reminder_channel_desc)
             }
             notificationManager.createNotificationChannel(channel)
         }

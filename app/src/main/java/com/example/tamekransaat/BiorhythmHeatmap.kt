@@ -28,23 +28,42 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.input.pointer.pointerInput
 
 
 @Composable
 fun BiorhythmHeatmap(preferencesManager: PreferencesManager) {
-    val daysTr = listOf("Pzt", "Sal", "Çar", "Per", "Cum", "Cts", "Paz")
+    val days = (1..7).map { java.time.DayOfWeek.of(it).getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault()) }
+    var showInfoDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Haftalık Bioritim (Isı Haritası)",
-            color = Color.White,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.weekly_biorhythm),
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            
+            // Üst sağ köşe bilgilendirme (ampul) butonu
+            IconButton(
+                onClick = { showInfoDialog = true },
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+                Text(
+                    text = "💡", 
+                    fontSize = 20.sp,
+                    color = Color.White
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -54,7 +73,7 @@ fun BiorhythmHeatmap(preferencesManager: PreferencesManager) {
             Column(
                 modifier = Modifier.fillMaxHeight().padding(end = 12.dp, top = 24.dp)
             ) {
-                daysTr.forEach { dayName ->
+                days.forEach { dayName ->
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
                         Text(
                             text = dayName,
@@ -116,6 +135,38 @@ fun BiorhythmHeatmap(preferencesManager: PreferencesManager) {
                     }
                 }
             }
+        }
+        
+        // Bilgilendirme Diyaloğu
+        if (showInfoDialog) {
+            AlertDialog(
+                onDismissRequest = { showInfoDialog = false },
+                containerColor = Color(0xFF161618),
+                shape = RoundedCornerShape(24.dp),
+                title = { 
+                    Text(
+                        text = stringResource(R.string.biorhythm_info_title), 
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
+                text = { 
+                    Text(
+                        text = stringResource(R.string.biorhythm_info_desc), 
+                        color = Color.LightGray,
+                        fontSize = 16.sp,
+                        lineHeight = 22.sp
+                    ) 
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { showInfoDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+                    ) {
+                        Text(stringResource(R.string.got_it), color = Color.White)
+                    }
+                }
+            )
         }
     }
 }

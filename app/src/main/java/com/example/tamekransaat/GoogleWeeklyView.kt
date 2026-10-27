@@ -40,8 +40,8 @@ fun GoogleCalendarStyleWeeklyView(preferencesManager: PreferencesManager, onEdit
     val startOfTargetWeek = today.plusWeeks(weeksOffset.toLong()).with(java.time.DayOfWeek.MONDAY)
     val endOfTargetWeek = startOfTargetWeek.plusDays(6)
 
-    val daysTr = listOf("Pzt", "Sal", "Çar", "Per", "Cum", "Cts", "Paz")
-    val monthsTr = listOf("Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık")
+    val days = (1..7).map { java.time.DayOfWeek.of(it).getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault()) }
+    val months = (1..12).map { java.time.Month.of(it).getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault()) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -57,7 +57,7 @@ fun GoogleCalendarStyleWeeklyView(preferencesManager: PreferencesManager, onEdit
             }
 
             Text(
-                text = "${startOfTargetWeek.dayOfMonth} ${monthsTr[startOfTargetWeek.monthValue - 1]} - ${endOfTargetWeek.dayOfMonth} ${monthsTr[endOfTargetWeek.monthValue - 1]} ${endOfTargetWeek.year}",
+                text = "${startOfTargetWeek.dayOfMonth} ${months[startOfTargetWeek.monthValue - 1]} - ${endOfTargetWeek.dayOfMonth} ${months[endOfTargetWeek.monthValue - 1]} ${endOfTargetWeek.year}",
                 color = Color.White,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
@@ -101,7 +101,7 @@ fun GoogleCalendarStyleWeeklyView(preferencesManager: PreferencesManager, onEdit
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "${daysTr[i]} ${date.dayOfMonth}",
+                                text = "${days[i]} ${date.dayOfMonth}",
                                 color = if (isToday) Color(0xFF4CAF50) else Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp

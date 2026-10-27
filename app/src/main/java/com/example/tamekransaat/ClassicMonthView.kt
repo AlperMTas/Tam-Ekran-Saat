@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.input.pointer.pointerInput
 
 
@@ -42,7 +43,7 @@ fun ClassicMonthView(preferencesManager: PreferencesManager) {
     var showMonthPicker by remember { mutableStateOf(false) }
     var pickerYear by remember { mutableIntStateOf(currentYearMonth.year) }
 
-    val monthsTr = listOf("Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık")
+    val months = (1..12).map { java.time.Month.of(it).getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault()) }
     val firstDayOfWeek = currentYearMonth.atDay(1).dayOfWeek.value
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -61,7 +62,7 @@ fun ClassicMonthView(preferencesManager: PreferencesManager) {
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "${monthsTr[currentYearMonth.monthValue - 1]} ${currentYearMonth.year}",
+                        text = "${months[currentYearMonth.monthValue - 1]} ${currentYearMonth.year}",
                         color = Color.White,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
@@ -76,7 +77,7 @@ fun ClassicMonthView(preferencesManager: PreferencesManager) {
 
                     if (currentYearMonth != YearMonth.now()) {
                         Text(
-                            text = "Bugüne Dön",
+                            text = stringResource(R.string.back_to_today),
                             color = Color(0xFF4CAF50),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
@@ -100,7 +101,7 @@ fun ClassicMonthView(preferencesManager: PreferencesManager) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.width(600.dp)
             ) {
-                val daysOfWeek = listOf("PZT", "SAL", "ÇAR", "PER", "CUM", "CTS", "PAZ")
+                val daysOfWeek = (1..7).map { java.time.DayOfWeek.of(it).getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault()).uppercase() }
                 items(7) { index ->
                     Text(
                         text = daysOfWeek[index],
@@ -218,7 +219,7 @@ fun ClassicMonthView(preferencesManager: PreferencesManager) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = monthsTr[index],
+                                    text = months[index],
                                     color = if (isSelected) Color.Black else Color.White,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                     fontSize = 16.sp
@@ -229,7 +230,7 @@ fun ClassicMonthView(preferencesManager: PreferencesManager) {
                 },
                 confirmButton = {
                     TextButton(onClick = { showMonthPicker = false }) {
-                        Text("İptal", color = Color.Gray)
+                        Text(stringResource(R.string.cancel), color = Color.Gray)
                     }
                 }
             )
