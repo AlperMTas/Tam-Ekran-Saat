@@ -85,29 +85,29 @@ fun GrowthCenterView(preferencesManager: PreferencesManager) {
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .heightIn(min = 100.dp), // Kutu yüksekliğini artırdım
+                .heightIn(min = 80.dp), // Kutu yüksekliğini dengeledim
             colors = CardDefaults.cardColors(containerColor = Color(0xFF161916)), // Şık koyu yeşil arka plan
-            shape = RoundedCornerShape(20.dp) // Köşeleri biraz daha yumuşattım
+            shape = RoundedCornerShape(16.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp), // İç boşluğu (padding) artırdım
+                    .padding(20.dp), // İç boşluğu kıstım
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("✨", fontSize = 32.sp) // İkonu büyüttüm
-                Spacer(modifier = Modifier.width(16.dp))
+                Text("✨", fontSize = 28.sp) // İkonu bir tık ufalttım
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = insightText,
                     color = Color(0xFFE8F5E9),
-                    fontSize = 20.sp, // Metin boyutu 18sp'den 20sp'ye çıkarıldı
+                    fontSize = 18.sp, // Metni biraz ufaltıp dengeledik
                     fontWeight = FontWeight.Medium,
-                    lineHeight = 28.sp // Satır arası boşluk orantılı artırıldı
+                    lineHeight = 26.sp
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(16.dp)) // Boşlukları daralttık
 
         // BAŞLIK
         Text(
@@ -118,7 +118,7 @@ fun GrowthCenterView(preferencesManager: PreferencesManager) {
             letterSpacing = 1.sp
         )
         
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(16.dp)) // Boşlukları daralttık
 
         // ESKİ İKONİK ÇEMBERLİ İSTATİSTİKLER (Tamamen orjinal yapısına sadık kalarak)
         Row(
@@ -177,29 +177,29 @@ fun GrowthCenterView(preferencesManager: PreferencesManager) {
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(24.dp)) // Alttaki boşluğu da daralttık
 
         // ALT BİLGİ: Motivasyon Mesajı
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .heightIn(min = 100.dp), // Kutu yüksekliğini artırdım
+                .heightIn(min = 80.dp), // Kutu yüksekliğini biraz kıstım
             colors = CardDefaults.cardColors(containerColor = Color(0xFF16161A)), // Şık koyu lacivert
-            shape = RoundedCornerShape(20.dp) // Köşeleri biraz daha yumuşattım
+            shape = RoundedCornerShape(16.dp) // Köşeleri tekrar eski zarifliğe çektim
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp), // İç boşluğu (padding) artırdım
+                    .padding(20.dp), // İç boşluğu kıstım
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("💡", fontSize = 32.sp) // İkonu büyüttüm
-                Spacer(modifier = Modifier.width(16.dp))
+                Text("💡", fontSize = 28.sp) // İkonu bir tık ufalttım
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = message,
                     color = Color.White,
-                    fontSize = 20.sp, // Metin boyutu 18sp'den 20sp'ye çıkarıldı
-                    lineHeight = 28.sp, // Satır arası boşluk orantılı artırıldı
+                    fontSize = 18.sp, // Metni biraz ufaltıp dengeledik
+                    lineHeight = 26.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
