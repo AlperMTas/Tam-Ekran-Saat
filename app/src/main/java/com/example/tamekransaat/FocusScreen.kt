@@ -122,14 +122,27 @@ fun FocusScreen(
     
     // 1. Yaşam Döngüsü (Lifecycle) Gözlemcisi
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-    var isResumed by remember { mutableStateOf(false) }
+    var isAppInForeground by remember { mutableStateOf(true) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-                isResumed = true
+                isAppInForeground = true
+                
+                // --- KRİTİK NOKTA ---
+                // Uygulama uyandığı an, UI iş parçacığı serbestken konfetiyi tetiklemek
+                // en güvenilir yöntemdir.
+                if (preferencesManager.focusCompletedInBackground) {
+                    preferencesManager.focusCompletedInBackground = false
+                    isRunning = false
+                    isDragging = false
+                    isSleepMode = false
+                    secondsLeft = preferencesManager.getFocusDuration() * 60
+                    showCongratulation = true
+                }
+                
             } else if (event == androidx.lifecycle.Lifecycle.Event.ON_PAUSE) {
-                isResumed = false
+                isAppInForeground = false
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -139,8 +152,8 @@ fun FocusScreen(
     }
 
     // 2. Uygulama Ön Plana Geldiğinde (Resume) veya Baştan Açıldığında Konfeti Kontrolü
-    LaunchedEffect(isResumed) {
-        if (isResumed && preferencesManager.focusCompletedInBackground) {
+    LaunchedEffect(Unit) {
+        if (preferencesManager.focusCompletedInBackground) {
             preferencesManager.focusCompletedInBackground = false
             isRunning = false
             isDragging = false
@@ -154,8 +167,8 @@ fun FocusScreen(
     LaunchedEffect(isRunning, isDragging) {
         if (isRunning && !isDragging) {
             while (true) {
-                // AlarmManager arka planda süreyi bitirip bayrağı kaldırdıysa:
-                if (!preferencesManager.isFocusRunning && preferencesManager.focusCompletedInBackground) {
+                // AlarmManager arka planda süreyi bitirip bayrağı kaldırdıysa VE UYGULAMA AÇIKSA:
+                if (!preferencesManager.isFocusRunning && preferencesManager.focusCompletedInBackground && isAppInForeground) {
                     preferencesManager.focusCompletedInBackground = false
                     isRunning = false
                     isSleepMode = false

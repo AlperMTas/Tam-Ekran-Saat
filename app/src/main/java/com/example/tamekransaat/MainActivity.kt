@@ -51,6 +51,15 @@ class MainActivity : ComponentActivity() {
     private val appState = mutableStateOf(AppState.AMBIENT)
     private val initialCalendarTab = mutableStateOf(CalendarTab.GROWTH)
 
+    // Uygulama herhangi bir şekilde ekrana geldiğinde, arka planda bitmiş bir odak süresi varsa
+    // doğrudan odak (konfeti) ekranına geçilmesini garantiler.
+    override fun onResume() {
+        super.onResume()
+        if (::preferencesManager.isInitialized && preferencesManager.focusCompletedInBackground) {
+            appState.value = AppState.FOCUS
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preferencesManager = PreferencesManager(this)

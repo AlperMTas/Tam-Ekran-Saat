@@ -34,8 +34,20 @@ import androidx.compose.ui.input.pointer.pointerInput
 
 @Composable
 fun BiorhythmHeatmap(preferencesManager: PreferencesManager) {
-    val days = (1..7).map { java.time.DayOfWeek.of(it).getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault()) }
+    val days = remember { (1..7).map { java.time.DayOfWeek.of(it).getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault()) } }
     var showInfoDialog by remember { mutableStateOf(false) }
+    
+    // Veritabanından (SharedPreferences) 168 hücrenin (7 gün x 24 saat) 
+    // değerlerini bir defa okuyup hafızaya alıyoruz. Her render'da tekrar okumayı (kasmayı) engeller.
+    val heatmapData = remember {
+        val data = Array(8) { IntArray(24) }
+        for (day in 1..7) {
+            for (hour in 0..23) {
+                data[day][hour] = preferencesManager.getHeatmapMinute(day, hour)
+            }
+        }
+        data
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -105,7 +117,7 @@ fun BiorhythmHeatmap(preferencesManager: PreferencesManager) {
                     for (day in 1..7) {
                         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
                             for (hour in 0..23) {
-                                val mins = preferencesManager.getHeatmapMinute(day, hour)
+                                val mins = heatmapData[day][hour]
                                 val fraction = (mins / 60f).coerceIn(0f, 1f)
 
                                 val boxColor = if (mins == 0) {
