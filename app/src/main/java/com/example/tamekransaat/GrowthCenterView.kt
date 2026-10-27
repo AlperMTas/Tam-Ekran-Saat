@@ -1,6 +1,8 @@
 ﻿package com.example.tamekransaat
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -8,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
@@ -15,11 +18,7 @@ import androidx.compose.ui.res.stringResource
 
 @Composable
 fun GrowthCenterView(preferencesManager: PreferencesManager) {
-    // PERFORMANS ÇÖZÜMÜ:
-    // Menüler arası geçişteki kasma ve donmaların sebebi, her frame çiziminde
-    // SharedPreferences veritabanından 180'den fazla veri okunmasıydı.
-    // 'remember' kullanarak bu hesaplamaların sekme açıldığında SADECE BİR KERE yapılmasını sağladım.
-    // Artık geçişler yağ gibi akacak.
+    // Performans iyileştirmesi: 180 döngü sadece sayfa açıldığında bir kez hesaplanır
     val stats = remember {
         val tw = preferencesManager.getWeeklyFocusMinutes(0)
         val lw = preferencesManager.getWeeklyFocusMinutes(1)
@@ -74,107 +73,127 @@ fun GrowthCenterView(preferencesManager: PreferencesManager) {
         stringResource(R.string.smart_analysis_data, bestDayName, formattedHour)
     }
 
-    // YENİ, SADE VE ŞIK TASARIM
+    // ESKİ DİZİLİM, YENİ GÖRSELLER (Yuvarlak Çemberler Geri Döndü!)
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
+        verticalArrangement = Arrangement.Center
     ) {
+        // ÜST BİLGİ: Yapay Zeka Analizi (Eski üst kutunun daha şık hali)
+        Card(
+            modifier = Modifier.fillMaxWidth(0.9f),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF161916)), // Şık koyu yeşil arka plan
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("✨", fontSize = 24.sp)
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = insightText,
+                    color = Color(0xFFE8F5E9),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 22.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
         // BAŞLIK
         Text(
-            text = stringResource(R.string.personal_growth_center),
+            text = "📈 " + stringResource(R.string.personal_growth_center),
             color = Color.White,
-            fontSize = 22.sp,
+            fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.sp
         )
+        
+        Spacer(modifier = Modifier.height(28.dp))
 
-        // 1. HAFTALIK ÖZET KARTI
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .wrapContentHeight(),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-            shape = RoundedCornerShape(20.dp)
+        // ESKİ İKONİK ÇEMBERLİ İSTATİSTİKLER (Tamamen orjinal yapısına sadık kalarak)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Geçen Hafta
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(R.string.last_week), color = Color.Gray, fontSize = 16.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
+            // Geçen Hafta
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(R.string.last_week), color = Color.Gray, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .background(Color(0xFF1E1E1E), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(stringResource(R.string.min_format, lastWeekMinutes), color = Color.LightGray, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 }
+            }
 
-                // Trend
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    if (!isNeutral && (thisWeekMinutes > 0 || lastWeekMinutes > 0)) {
-                        val color = if (isPositive) Color(0xFF4CAF50) else Color(0xFFFF9800)
-                        val icon = if (isPositive) "▲" else "▼"
+            // Trend
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (!isNeutral && (thisWeekMinutes > 0 || lastWeekMinutes > 0)) {
+                    val trendColor = if (isPositive) Color(0xFF4CAF50) else Color(0xFFFF9800)
+                    val icon = if (isPositive) "▲" else "▼"
+                    Surface(
+                        color = trendColor.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
                         Text(
                             text = "$icon %${percentage.toInt()}",
-                            color = color,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
+                            color = trendColor,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
-                    } else {
-                        Text("=", color = Color.Gray, fontSize = 32.sp, fontWeight = FontWeight.Bold)
                     }
+                } else {
+                    Text("=", color = Color.White, fontSize = 48.sp, fontWeight = FontWeight.Bold)
                 }
+            }
 
-                // Bu Hafta
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(R.string.this_week), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(stringResource(R.string.min_format, thisWeekMinutes), color = Color(0xFF4CAF50), fontSize = 36.sp, fontWeight = FontWeight.ExtraBold)
+            // Bu Hafta
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(R.string.this_week), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(140.dp)
+                        .background(Color(0xFF00FF33).copy(alpha = 0.15f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(R.string.min_format, thisWeekMinutes), color = Color.White, fontSize = 36.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
 
-        // 2. YARDIMCI BİLGİLER (İki yan yana kutu)
-        Row(
-            modifier = Modifier.fillMaxWidth(0.9f),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Analiz
-            Card(
-                modifier = Modifier.weight(1f),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("✨", fontSize = 16.sp)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.ai_insight), color = Color(0xFF4CAF50), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = insightText, color = Color.LightGray, fontSize = 14.sp, lineHeight = 20.sp)
-                }
-            }
+        Spacer(modifier = Modifier.height(40.dp))
 
-            // Motivasyon
-            Card(
-                modifier = Modifier.weight(1f),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-                shape = RoundedCornerShape(16.dp)
+        // ALT BİLGİ: Motivasyon Mesajı
+        Card(
+            modifier = Modifier.fillMaxWidth(0.85f),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF16161A)), // Şık koyu lacivert
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("💡", fontSize = 16.sp)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.motivation), color = Color(0xFF2196F3), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = message, color = Color.LightGray, fontSize = 14.sp, lineHeight = 20.sp)
-                }
+                Text("💡", fontSize = 28.sp)
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = message,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    lineHeight = 26.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }
