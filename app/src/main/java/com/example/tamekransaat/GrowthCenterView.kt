@@ -56,23 +56,52 @@ fun GrowthCenterView(preferencesManager: PreferencesManager) {
         100f
     }
 
-    var maxMinutes = 0
+    var maxScore = 0f
     var bestDay = 1
     var bestHour = 9
+    
+    // Tüm ısı haritası verilerini komşu saatleri (arka arkaya odaklanmayı) kontrol edebilmek için RAM'e alıyoruz
+    val heatmap = Array(8) { IntArray(24) }
+    for (d in 1..7) {
+        for (h in 0..23) {
+            heatmap[d][h] = preferencesManager.getHeatmapMinute(d, h)
+        }
+    }
 
     for (d in 1..7) {
         for (h in 0..23) {
-            val mins = preferencesManager.getHeatmapMinute(d, h)
-            if (mins > maxMinutes) {
-                maxMinutes = mins
-                bestDay = d
-                bestHour = h
+            val mins = heatmap[d][h]
+            if (mins > 0) {
+                // 1. Temel Puan: O saatteki kümülatif çalışma süresi
+                var score = mins.toFloat()
+                
+                // 2. Süreklilik (Flow State) Bonusu: Arka arkaya çalışılmış mı?
+                // Bir önceki ve bir sonraki saatlerdeki odaklanmaları da hesaba katarak zinciri ödüllendir.
+                val prevHourMins = if (h > 0) heatmap[d][h - 1] else 0
+                val nextHourMins = if (h < 23) heatmap[d][h + 1] else 0
+                
+                // Komşu saatlerin ortalamasının bir kısmını bonus olarak ekle
+                val clusterBonus = (prevHourMins + nextHourMins) * 0.4f
+                score += clusterBonus
+                
+                // 3. Bağlam/Zorluk Çarpanı (Hafifletilmiş)
+                // Hafta içi okul/mesai saatleri (08:00 - 15:59) hala kıymetli ama tek başına sonuçları domine etmesin (%15 bonus)
+                val isWeekdaySchoolHour = d in 1..5 && h in 8..15
+                if (isWeekdaySchoolHour) {
+                    score *= 1.15f
+                }
+                
+                if (score > maxScore) {
+                    maxScore = score
+                    bestDay = d
+                    bestHour = h
+                }
             }
         }
     }
 
     val daysTr = listOf("Pzt", "Sal", "Çar", "Per", "Cum", "Cts", "Paz")
-    val insightText = if (maxMinutes == 0) {
+    val insightText = if (maxScore == 0f) {
         "Akıllı Analiz: Henüz yeterli veri yok. Odaklanmaya başla!"
     } else {
         "Akıllı Analiz: En yüksek verimini ${daysTr[bestDay - 1]} sabah ${String.format(Locale.getDefault(), "%02d:00", bestHour)} sularında alıyorsun. Bugün o saatte en zor işini hallet!"
