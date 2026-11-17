@@ -36,14 +36,23 @@ fun AmbientScreen(
     val clockFontFamily = FontFamily(Font(R.font.arcens_display))
     val formatter = DateTimeFormatter.ofPattern("HH:mm") // Saniyeleri kaldırıp sadece Saat:Dakika bırakıyoruz
 
-    // Yalnızca dakika değiştiğinde state güncellenir (Dikkat dağınıklığını azaltıp performansı artırmak için)
+    // PERFORMANS VE PİL OPTİMİZASYONU:
+    // Saniyede bir kez (delay(1000)) uyanıp "dakika değişti mi?" diye sormak yerine,
+    // bir sonraki dakikanın başlamasına tam olarak kaç milisaniye kaldığını hesaplayıp
+    // işlemciyi (CPU) o süre boyunca tamamen derin uykuya yatırıyoruz.
     LaunchedEffect(Unit) {
         while (true) {
             val now = LocalTime.now()
             if (now.minute != time.minute) {
                 time = now
             }
-            delay(1000) // Her saniye kontrol et, ama yalnızca dakika atladığında state tetiklenir
+            
+            // Şu anki saniye ve milisaniyeye bakarak, bir sonraki tam dakikaya ne kadar kaldığını bul
+            val currentMillis = System.currentTimeMillis()
+            val millisUntilNextMinute = 60000L - (currentMillis % 60000L)
+            
+            // İşlemciyi gereksiz yere yormamak için tam o kadar süre bekle (Uyku modu)
+            delay(millisUntilNextMinute) 
         }
     }
 
