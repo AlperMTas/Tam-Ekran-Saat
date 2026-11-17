@@ -21,6 +21,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.platform.LocalContext
+import android.app.Activity
+import android.content.ContextWrapper
+import android.view.WindowManager
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
@@ -56,10 +62,49 @@ fun AmbientScreen(
         }
     }
 
+    val context = LocalContext.current
+    var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
+
+    // Ekran parlaklığını ayarlayan yardımcı fonksiyon
+    fun setScreenBrightness(brightness: Float) {
+        val activity = generateSequence(context) { if (it is ContextWrapper) it.baseContext else null }
+            .firstOrNull { it is Activity } as? Activity
+        
+        activity?.window?.let { window ->
+            val layoutParams = window.attributes
+            layoutParams.screenBrightness = brightness
+            window.attributes = layoutParams
+        }
+    }
+
+    // 10 dakika (600.000 ms) boyunca ekrana hiç dokunulmazsa parlaklığı %5'e kadar kıs
+    LaunchedEffect(lastInteractionTime) {
+        // İlk etapta parlaklığı sisteme geri bırak (veya standart maksimum değere)
+        setScreenBrightness(WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
+        
+        delay(600_000L) // 10 Dakika bekle
+        
+        // Eğer 10 dakika boyunca kullanıcı ekrana hiç dokunmamışsa ve iptal edilmediyse
+        // Parlaklığı %5 seviyesine (0.05f) çekerek ekstrem pil tasarrufu sağla.
+        setScreenBrightness(0.05f)
+    }
+    
+    // Ekrana her dokunuşta zamanı güncelle ve ekranı geri aydınlat
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black), // Saf Siyah (#000000) OLED dostu arka plan
+            .background(Color.Black) // Saf Siyah (#000000) OLED dostu arka plan
+            .pointerInput(Unit) {
+                // Tıklamaları yakala ve alt componentlere de ilet (Pass)
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                        if (event.changes.any { it.pressed }) {
+                            lastInteractionTime = System.currentTimeMillis()
+                        }
+                    }
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
