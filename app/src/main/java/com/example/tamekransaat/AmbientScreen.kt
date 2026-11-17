@@ -86,7 +86,7 @@ fun AmbientScreen(
         
         // Eğer 10 dakika boyunca kullanıcı ekrana hiç dokunmamışsa ve iptal edilmediyse
         // Parlaklığı %5 seviyesine (0.05f) çekerek ekstrem pil tasarrufu sağla.
-        setScreenBrightness(0.05f)
+        setScreenBrightness(0.15f)
     }
     
     // Ekrana her dokunuşta zamanı güncelle ve ekranı geri aydınlat
